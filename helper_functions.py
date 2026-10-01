@@ -1,3 +1,6 @@
+from Bio.Align import substitution_matrices
+
+
 def global_alignment(seq1, seq2, scoring_function):
     """Global sequence alignment using the Needleman–Wunsch algorithm.
 
@@ -28,6 +31,90 @@ def global_alignment(seq1, seq2, scoring_function):
     Other alignments are not possible.
 
     """
+    gap_pen = 1
+    
+
+    matrix = []
+
+    for i in range(len(seq1) + 1):
+        row = []
+
+        for j in range(len(seq2) + 1):
+            row.append(0)
+
+        matrix.append(row)
+
+
+    for i in range(0,len(matrix[0])):
+        matrix[0][i] = i*-gap_pen
+
+    for i in range(0,len(matrix)):
+        matrix[i][0] = i*-gap_pen
+
+    
+
+    for i in range(1,len(matrix)):
+        for j in range(1,len(matrix[i])):
+            up = matrix[i-1][j] - gap_pen
+            left = matrix[i][j-1] - gap_pen
+            diagonal = scoring_function(seq1[i-1], seq2[j-1]) + matrix[i-1][j-1]
+            
+
+            matrix[i][j] = max(up,left,diagonal)
+
+
+    i = len(seq1)
+    j = len(seq2)
+
+ 
+    
+
+
+    aligned_seq1 = ""
+    aligned_seq2 = ""
+
+    while i > 0 or j > 0:
+
+        if i > 0 and j > 0:
+
+            diagonal = (
+                matrix[i - 1][j - 1]
+                + scoring_function(seq1[i - 1], seq2[j - 1])
+            )
+
+            if matrix[i][j] == diagonal:
+                aligned_seq1 += seq1[i - 1]
+                aligned_seq2 += seq2[j - 1]
+
+                i -= 1
+                j -= 1
+                continue
+
+        if i > 0:
+
+            up = matrix[i - 1][j] - gap_pen
+
+            if matrix[i][j] == up:
+                aligned_seq1 += seq1[i - 1]
+                aligned_seq2 += "-"
+
+                i -= 1
+                continue
+
+   
+        if j > 0:
+            aligned_seq1 += "-"
+            aligned_seq2 += seq2[j - 1]
+
+            j -= 1
+
+    aligned_seq1 = aligned_seq1[::-1]
+    aligned_seq2 = aligned_seq2[::-1]
+
+    final_score = float(matrix[-1][-1])
+
+    return aligned_seq1, aligned_seq2, final_score
+    
     raise NotImplementedError()
 
 
@@ -68,3 +155,17 @@ def local_alignment(seq1, seq2, scoring_function):
 def scoring_function_simple(aa_i,aa_j):
     score = [-1, 1][aa_i == aa_j]
     return (score)
+
+
+
+_blosum62_table = {}
+_blosum62 = substitution_matrices.load("BLOSUM62")
+for a in _blosum62.alphabet:
+    for b in _blosum62.alphabet:
+        _blosum62_table[(a, b)] = _blosum62[a][b]
+
+def scoring_function_blosum62(aa_i, aa_j):
+    return _blosum62_table[(aa_i, aa_j)]
+
+
+print(global_alignment("abracadabra", "dabarakadara", lambda x, y: [-1, 1][x == y]))
