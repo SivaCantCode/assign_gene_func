@@ -115,7 +115,7 @@ def global_alignment(seq1, seq2, scoring_function):
 
     return aligned_seq1, aligned_seq2, final_score
     
-    raise NotImplementedError()
+   
 
 
 def local_alignment(seq1, seq2, scoring_function):
