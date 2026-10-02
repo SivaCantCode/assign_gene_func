@@ -266,4 +266,6 @@ def scoring_function_blosum62(aa_i, aa_j):
 
 
 print(global_alignment("abracadabra", "dabarakadara", lambda x, y: [-1, 1][x == y]))
+
+
 print(local_alignment("pending itch", "unending glitch", lambda x, y: [-1, 1][x == y]))
